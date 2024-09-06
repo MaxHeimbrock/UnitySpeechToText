@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using System.Runtime.CompilerServices;
+using UnityEngine;
 #if UNITY_2018_4_OR_NEWER && !SPEECH_TO_TEXT_DISABLE_ASYNC_FUNCTIONS
 using System.Threading.Tasks;
 #endif
@@ -8,6 +9,13 @@ using SpeechToTextNamespace;
 
 public static class SpeechToText
 {
+	public static string _message = "Hello Test One Two Three";
+
+	public static void SetMessage(string message)
+	{
+		_message = message;
+	}
+	
 	public enum Permission
 	{
 		/// <summary>
@@ -322,19 +330,24 @@ public static class SpeechToText
 		{
 			speechSessionEmulator.StartCoroutine( EmulateVoiceLevelChangeOnEditor() );
 
+			var words = _message.Split(' ');
+			var subMessage = "";
+
 			yield return new WaitForSecondsRealtime( 0.25f );
 			speechSessionEmulatorListener.OnReadyForSpeech();
 			yield return new WaitForSecondsRealtime( 0.5f );
 			speechSessionEmulatorListener.OnBeginningOfSpeech();
-			yield return new WaitForSecondsRealtime( 0.33f );
-			speechSessionEmulatorListener.OnPartialResultReceived( "Hello" );
-			yield return new WaitForSecondsRealtime( 0.33f );
-			speechSessionEmulatorListener.OnPartialResultReceived( "Hello world" );
-			yield return new WaitForSecondsRealtime( 0.5f );
+			
+			foreach (var word in words)
+			{
+				yield return new WaitForSecondsRealtime( 0.33f );
+				subMessage += $" {word}";
+				speechSessionEmulatorListener.OnPartialResultReceived( subMessage );	
+			}
 		}
 		finally
 		{
-			StopEmulateSpeechOnEditor( "Hello world", null );
+			StopEmulateSpeechOnEditor( _message, null );
 		}
 	}
 
